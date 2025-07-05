@@ -6,3 +6,6 @@ tensorboard
 matplotlib
 streamlit
 scikeras
+pip install --upgrade pip
+
+
