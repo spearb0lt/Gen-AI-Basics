@@ -8,26 +8,34 @@ import os
 import tensorflow as tf
 from tensorflow.keras.layers import InputLayer as _OriginalInputLayer
 
-# --- Monkey‐patch InputLayer to accept `batch_shape` ---
-class InputLayer(_OriginalInputLayer):
-    def __init__(self, *args, batch_shape=None, **kwargs):
-        # If `batch_shape` was saved, map it to `batch_input_shape`
-        if batch_shape is not None:
-            kwargs['batch_input_shape'] = tuple(batch_shape)
-        super().__init__(*args, **kwargs)
+# # --- Monkey‐patch InputLayer to accept `batch_shape` ---
+# class InputLayer(_OriginalInputLayer):
+#     def __init__(self, *args, batch_shape=None, **kwargs):
+#         # If `batch_shape` was saved, map it to `batch_input_shape`
+#         if batch_shape is not None:
+#             kwargs['batch_input_shape'] = tuple(batch_shape)
+#         super().__init__(*args, **kwargs)
 # Load the IMDB dataset word index
 word_index = imdb.get_word_index()
 reverse_word_index = {value: key for key, value in word_index.items()}
 BASE_DIR = os.path.dirname(__file__)
 model_path = os.path.join(BASE_DIR, 'simple_rnn_imdb.h5')
 # Load the pre-trained model with ReLU activation
-# model = tf.keras.models.load_model(model_path)
-# Pass our patched InputLayer in custom_objects
-model = tf.keras.models.load_model(
-    model_path,
-    custom_objects={'InputLayer': InputLayer},
-    compile=False
+model = tf.keras.models.load_model(model_path)
+
+model.save(
+    'simple_rnn_imdb_savedmodel',
+    save_format='tf'
 )
+sm_path  = os.path.join(BASE_DIR, 'simple_rnn_imdb_savedmodel')
+model    = tf.keras.models.load_model(sm_path)
+
+# Pass our patched InputLayer in custom_objects
+# model = tf.keras.models.load_model(
+#     model_path,
+#     custom_objects={'InputLayer': InputLayer},
+#     compile=False
+# )
 # Step 2: Helper Functions
 # Function to decode reviews
 def decode_review(encoded_review):
